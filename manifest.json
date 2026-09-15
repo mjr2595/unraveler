@@ -1,0 +1,59 @@
+{
+  "manifest_version": 3,
+  "name": "Unraveler — Jira Thread Expander",
+  "version": "1.0.0",
+  "description": "Automatically expands Jira Cloud issue threads: 'Show more comments', 'Show more replies', and history 'Load more'.",
+  "minimum_chrome_version": "116",
+
+  "permissions": ["storage", "scripting", "activeTab"],
+
+  "host_permissions": [
+    "*://*.atlassian.net/*"
+  ],
+
+  "optional_host_permissions": ["*://*/*"],
+
+  "background": {
+    "service_worker": "src/background.js"
+  },
+
+  "action": {
+    "default_title": "Unraveler — Jira Thread Expander",
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.atlassian.net/*"
+      ],
+      "js": [
+        "src/shared/defaults.js",
+        "src/content/expander.js",
+        "src/content/main.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+
+  "commands": {
+    "expand-now": {
+      "suggested_key": { "default": "Alt+Shift+E" },
+      "description": "Expand all Jira threads on the current page"
+    }
+  }
+}

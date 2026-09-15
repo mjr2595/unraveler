@@ -1,0 +1,8 @@
+# macOS
+.DS_Store
+
+# Tooling caches
+.ruff_cache/
+
+# Packaged extension artifacts
+*.zip
