@@ -1,17 +1,16 @@
-# Unraveler — Jira Thread Expander
+# ![Unraveler Logo](icons/icon32.png) Unraveler
 
-Chrome extension (MV3) that automatically expands Jira Cloud issue threads by clicking
+Chrome extension (MV3) that automatically **expands Jira Cloud issue threads** by clicking
 every _Show more comments_, _Show more replies_, and history _Load more_ button until
 the whole thread is on screen.
 
-No build step. Load the folder unpacked and it works.
-
 ## Install
 
-1. Open `chrome://extensions`
-2. Enable **Developer mode** (top right)
-3. **Load unpacked** → select this folder
-4. Open a Jira issue
+1. Clone this repo or download the zip from releases
+2. Open `chrome://extensions`
+3. Enable **Developer mode** (top right)
+4. **Load unpacked** → select this folder
+5. Open a Jira issue
 
 It runs automatically. The toolbar badge shows the click count: blue while working,
 green when finished, orange if it stopped at a safety limit.
@@ -81,21 +80,6 @@ shift-click propagation, feature toggles, scroll restoration, malformed user sel
 empty pages, and latest-comment detection (id / timestamp / document-order fallback,
 scroll targeting, master-switch guard).
 
-## Layout
-
-```
-manifest.json
-src/
-  shared/defaults.js     settings + selectors + text patterns  ← edit selectors here
-  content/expander.js    the engine (click loop, progress detection)
-  content/latest.js      newest-comment locator (scroll + highlight)
-  content/fab.js         floating scroll-to-latest button (Shadow DOM)
-  content/main.js        SPA nav detection, messaging, auto-trigger
-  background.js          badge, keyboard command, optional hosts
-  popup/                 status UI + settings
-test/                    DOM mock + regression suite
-```
-
 ## Known limitations
 
 - **Only expands what's mounted.** Jira's History lives behind a tab. If the _History_ or
@@ -104,6 +88,6 @@ test/                    DOM mock + regression suite
 - **The ~30-second collapse can't be fully fixed.** Comments sometimes collapse back long
   after loading (JRACLOUD-94212). Fast collapses are handled; a delayed one happens after
   the run has already finished. Press `Alt+Shift+E` to re-expand.
-- **Very large issues will hit the caps.** Thousands of history entries will stop at 60
+- **Very large issues will hit the caps.** Thousands of history entries will stop at 100
   clicks / 90 seconds. Raise the limits in the popup, or press `Alt+Shift+E` again — a
   fresh run resumes from wherever the last one stopped.
