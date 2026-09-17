@@ -1,105 +1,142 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Unraveler</title>
-  <link rel="stylesheet" href="popup.css" />
-</head>
-<body>
-  <header class="head">
-    <h1>Unraveler</h1>
-    <label class="switch" title="Master switch">
-      <input type="checkbox" id="enabled" />
-      <span class="slider"></span>
-    </label>
-  </header>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Unraveler</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="head">
+      <h1>Unraveler</h1>
+      <label class="switch" title="Master switch">
+        <input type="checkbox" id="enabled" />
+        <span class="slider"></span>
+      </label>
+    </header>
 
-  <section class="status" id="status">
-    <div class="status-dot" id="statusDot"></div>
-    <div class="status-text">
-      <div class="status-line" id="statusLine">Checking…</div>
-      <div class="status-sub" id="statusSub"></div>
-    </div>
-  </section>
+    <section class="status" id="status">
+      <div class="status-dot" id="statusDot"></div>
+      <div class="status-text">
+        <div class="status-line" id="statusLine">Checking…</div>
+        <div class="status-sub" id="statusSub"></div>
+      </div>
+    </section>
 
-  <div class="actions">
-    <button id="expand" class="btn btn-primary">Expand now</button>
-    <button id="stop" class="btn" disabled>Stop</button>
-  </div>
-
-  <p class="grant-row" id="grantRow" hidden>
-    <span>Unraveler isn't active on this site.</span>
-    <button id="grant" class="btn btn-small">Enable here</button>
-  </p>
-
-  <details class="settings">
-    <summary>Settings</summary>
-
-    <label class="row">
-      <input type="checkbox" id="autoRun" />
-      <span>Expand automatically on issue load</span>
-    </label>
-
-    <label class="row">
-      <input type="checkbox" id="expandComments" />
-      <span>Comments &amp; replies</span>
-    </label>
-
-    <label class="row">
-      <input type="checkbox" id="expandHistory" />
-      <span>History &ldquo;Load more&rdquo;</span>
-    </label>
-
-    <label class="row">
-      <input type="checkbox" id="textFallback" />
-      <span>Match button text if testids change
-        <em>Escape hatch for Atlassian renames.</em>
-      </span>
-    </label>
-
-    <label class="row">
-      <input type="checkbox" id="preserveScroll" />
-      <span>Keep my scroll position
-        <em>Counters the JRACLOUD-94212 jump-to-top bug.</em>
-      </span>
-    </label>
-
-    <label class="row">
-      <input type="checkbox" id="shiftClick" />
-      <span>Shift-click to load all at once
-        <em>Works on Jira Server/DC. Unverified on Cloud — may do nothing.</em>
-      </span>
-    </label>
-
-    <div class="row row-num">
-      <span>Max clicks per run</span>
-      <input type="number" id="maxClicks" min="1" max="500" step="1" />
+    <div class="actions">
+      <button id="expand" class="btn btn-primary">Expand now</button>
+      <button id="stop" class="btn" disabled>Stop</button>
     </div>
 
-    <div class="row row-num">
-      <span>Max seconds per run</span>
-      <input type="number" id="maxSeconds" min="5" max="600" step="5" />
-    </div>
+    <p class="grant-row" id="grantRow" hidden>
+      <span>Unraveler isn't active on this site.</span>
+      <button id="grant" class="btn btn-small">Enable here</button>
+    </p>
 
-    <label class="row">
-      <input type="checkbox" id="debug" />
-      <span>Log to console
-        <em>Prefixed <code>[Unraveler]</code>.</em>
-      </span>
-    </label>
+    <details class="settings">
+      <summary>Settings</summary>
 
-    <details class="advanced">
-      <summary>Extra selectors</summary>
-      <p class="hint">One CSS selector per line, appended to the built-ins.</p>
-      <textarea id="extraSelectors" rows="3" spellcheck="false"
-        placeholder='[data-testid="some.new.button"]'></textarea>
+      <label class="row">
+        <input type="checkbox" id="autoRun" />
+        <span>Expand automatically on issue load</span>
+      </label>
+
+      <label class="row">
+        <input type="checkbox" id="expandComments" />
+        <span>Comments &amp; replies</span>
+      </label>
+
+      <label class="row">
+        <input type="checkbox" id="expandHistory" />
+        <span>History &ldquo;Load more&rdquo;</span>
+      </label>
+
+      <label class="row">
+        <input type="checkbox" id="textFallback" />
+        <span
+          >Match button text if testids change
+          <em>Escape hatch for Atlassian renames.</em>
+        </span>
+      </label>
+
+      <label class="row">
+        <input type="checkbox" id="preserveScroll" />
+        <span
+          >Keep my scroll position
+          <em>Counters the JRACLOUD-94212 jump-to-top bug.</em>
+        </span>
+      </label>
+
+      <label class="row">
+        <input type="checkbox" id="shiftClick" />
+        <span
+          >Shift-click to load all at once
+          <em
+            >Works on Jira Server/DC. Unverified on Cloud — may do nothing.</em
+          >
+        </span>
+      </label>
+
+      <label class="row">
+        <input type="checkbox" id="showScrollButton" />
+        <span
+          >Floating &ldquo;scroll to latest comment&rdquo; button
+          <em>Shown on issue views. Shortcut: Alt+Shift+L.</em>
+        </span>
+      </label>
+
+      <div class="row row-num">
+        <span>Button corner</span>
+        <select id="buttonPosition">
+          <option value="bottom-left">Bottom left</option>
+          <option value="bottom-right">Bottom right</option>
+          <option value="top-left">Top left</option>
+          <option value="top-right">Top right</option>
+        </select>
+      </div>
+
+      <div class="row row-num">
+        <span>Highlight duration (ms)</span>
+        <input type="number" id="highlightMs" min="0" max="10000" step="100" />
+      </div>
+
+      <div class="row row-num">
+        <span>Max clicks per run</span>
+        <input type="number" id="maxClicks" min="1" max="500" step="1" />
+      </div>
+
+      <div class="row row-num">
+        <span>Max seconds per run</span>
+        <input type="number" id="maxSeconds" min="5" max="600" step="5" />
+      </div>
+
+      <label class="row">
+        <input type="checkbox" id="debug" />
+        <span
+          >Log to console
+          <em>Prefixed <code>[Unraveler]</code>.</em>
+        </span>
+      </label>
+
+      <details class="advanced">
+        <summary>Extra selectors</summary>
+        <p class="hint">
+          One CSS selector per line, appended to the built-ins.
+        </p>
+        <textarea
+          id="extraSelectors"
+          rows="3"
+          spellcheck="false"
+          placeholder='[data-testid="some.new.button"]'
+        ></textarea>
+      </details>
+
+      <button id="reset" class="btn btn-small btn-quiet">
+        Reset to defaults
+      </button>
     </details>
 
-    <button id="reset" class="btn btn-small btn-quiet">Reset to defaults</button>
-  </details>
-
-  <script src="../shared/defaults.js"></script>
-  <script src="popup.js"></script>
-</body>
+    <script src="../shared/defaults.js"></script>
+    <script src="popup.js"></script>
+  </body>
 </html>

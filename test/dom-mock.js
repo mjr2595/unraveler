@@ -86,6 +86,8 @@ export class El {
       if (v === null) return false;
       if (a.value === null) continue;
       if (a.op === '*') { if (!v.includes(a.value)) return false; }
+      else if (a.op === '^') { if (!v.startsWith(a.value)) return false; }
+      else if (a.op === '$') { if (!v.endsWith(a.value)) return false; }
       else if (v !== a.value) return false;
     }
     return true;
@@ -117,6 +119,8 @@ export class El {
   }
 
   getBoundingClientRect() { return { width: 120, height: 32, top: 0, left: 0 }; }
+
+  scrollIntoView() { }
 
   addEventListener(type, fn) { (this._listeners[type] ||= []).push(fn); }
 
@@ -176,16 +180,16 @@ class Evt {
     this.button = init.button ?? 0;
   }
 }
-export class MouseEvent extends Evt {}
-export class PointerEvent extends Evt {}
+export class MouseEvent extends Evt { }
+export class PointerEvent extends Evt { }
 
 // --- window -------------------------------------------------------------
 
 export const windowMock = {
   scrollY: 0,
-  scrollTo() {},
+  scrollTo() { },
   getComputedStyle: () => ({ display: 'block', visibility: 'visible', opacity: '1' }),
-  addEventListener() {}
+  addEventListener() { }
 };
 
 export function install(globalObj) {

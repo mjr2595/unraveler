@@ -41,6 +41,7 @@
       if (key in cfg) cfg[key] = changes[key].newValue;
     });
     if (cfg.debug) console.log(LOG_PREFIX, 'Settings updated:', cfg);
+    updateFab();
   });
 
   // -------------------------------------------------------------------
@@ -149,6 +150,7 @@
 
     if (cfg.debug) console.log(LOG_PREFIX, 'Navigated:', currentKey, '->', key);
     currentKey = key;
+    updateFab();
 
     // Abandon any in-flight run; it belongs to the previous issue.
     UnravelerEngine.cancel();
@@ -201,10 +203,27 @@
         sendResponse(buildStatus({ running: false, reason: 'cancelled' }));
         return;
 
+      case 'unraveler:scroll-latest':
+        sendResponse(UnravelerLatest.scrollToLatest(cfg));
+        return; // synchronous
+
       default:
         return;
     }
   });
+
+  // -------------------------------------------------------------------
+  // Floating button
+  // -------------------------------------------------------------------
+
+  function mountFab() {
+    UnravelerFab.mount(function () { UnravelerLatest.scrollToLatest(cfg); });
+  }
+
+  function updateFab() {
+    UnravelerFab.setPosition(cfg.buttonPosition);
+    UnravelerFab.setVisible(!!currentKey && cfg.enabled && cfg.showScrollButton);
+  }
 
   // -------------------------------------------------------------------
   // Boot
@@ -217,6 +236,8 @@
 
     report(buildStatus());
     watchNavigation();
+    mountFab();
+    updateFab();
 
     if (currentKey && cfg.enabled && cfg.autoRun) scheduleRun(cfg.startupDelayMs);
   });

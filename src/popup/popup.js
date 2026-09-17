@@ -9,7 +9,7 @@
 
   var BOOLEAN_FIELDS = [
     'enabled', 'autoRun', 'expandComments', 'expandHistory',
-    'textFallback', 'preserveScroll', 'shiftClick', 'debug'
+    'textFallback', 'preserveScroll', 'shiftClick', 'showScrollButton', 'debug'
   ];
 
   var activeTab = null;
@@ -26,6 +26,8 @@
     });
     $('maxClicks').value = cfg.maxClicks;
     $('maxSeconds').value = Math.round(cfg.maxDurationMs / 1000);
+    $('highlightMs').value = cfg.highlightDurationMs;
+    $('buttonPosition').value = cfg.buttonPosition;
     $('extraSelectors').value = cfg.extraSelectors || '';
   }
 
@@ -54,6 +56,16 @@
       var n = parseInt(this.value, 10);
       if (!isFinite(n) || n < 5) { n = Math.round(UNRAVELER_DEFAULTS.maxDurationMs / 1000); this.value = n; }
       save({ maxDurationMs: n * 1000 });
+    });
+
+    $('highlightMs').addEventListener('change', function () {
+      var n = parseInt(this.value, 10);
+      if (!isFinite(n) || n < 0) { n = UNRAVELER_DEFAULTS.highlightDurationMs; this.value = n; }
+      save({ highlightDurationMs: n });
+    });
+
+    $('buttonPosition').addEventListener('change', function () {
+      save({ buttonPosition: this.value });
     });
 
     $('extraSelectors').addEventListener('change', function () {

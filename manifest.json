@@ -1,15 +1,13 @@
 {
   "manifest_version": 3,
   "name": "Unraveler — Jira Thread Expander",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Automatically expands Jira Cloud issue threads: 'Show more comments', 'Show more replies', and history 'Load more'.",
   "minimum_chrome_version": "116",
 
   "permissions": ["storage", "scripting", "activeTab"],
 
-  "host_permissions": [
-    "*://*.atlassian.net/*"
-  ],
+  "host_permissions": ["*://*.atlassian.net/*"],
 
   "optional_host_permissions": ["*://*/*"],
 
@@ -37,12 +35,12 @@
 
   "content_scripts": [
     {
-      "matches": [
-        "*://*.atlassian.net/*"
-      ],
+      "matches": ["*://*.atlassian.net/*"],
       "js": [
         "src/shared/defaults.js",
         "src/content/expander.js",
+        "src/content/latest.js",
+        "src/content/fab.js",
         "src/content/main.js"
       ],
       "run_at": "document_idle",
@@ -50,10 +48,21 @@
     }
   ],
 
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/icon128.png"],
+      "matches": ["*://*/*"]
+    }
+  ],
+
   "commands": {
     "expand-now": {
       "suggested_key": { "default": "Alt+Shift+E" },
       "description": "Expand all Jira threads on the current page"
+    },
+    "scroll-latest-comment": {
+      "suggested_key": { "default": "Alt+Shift+L" },
+      "description": "Scroll to and highlight the latest comment"
     }
   }
 }
