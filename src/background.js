@@ -50,8 +50,8 @@ function paintBadge(tabId, status) {
     color = '#22A06B';
   }
 
-  chrome.action.setBadgeText({ tabId: tabId, text: text }).catch(function () {});
-  chrome.action.setBadgeBackgroundColor({ tabId: tabId, color: color }).catch(function () {});
+  chrome.action.setBadgeText({ tabId: tabId, text: text }).catch(function () { });
+  chrome.action.setBadgeBackgroundColor({ tabId: tabId, color: color }).catch(function () { });
 }
 
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
@@ -72,12 +72,18 @@ chrome.tabs.onRemoved.addListener(function (tabId) {
 // Keyboard command
 // ---------------------------------------------------------------------
 
+var COMMAND_MESSAGE = {
+  'expand-now': 'unraveler:expand',
+  'scroll-latest-comment': 'unraveler:scroll-latest'
+};
+
 chrome.commands.onCommand.addListener(function (command) {
-  if (command !== 'expand-now') return;
+  var type = COMMAND_MESSAGE[command];
+  if (!type) return;
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     var tab = tabs && tabs[0];
     if (!tab || typeof tab.id !== 'number') return;
-    chrome.tabs.sendMessage(tab.id, { type: 'unraveler:expand' }, function () {
+    chrome.tabs.sendMessage(tab.id, { type: type }, function () {
       // Tab has no content script (wrong host) — nothing to do.
       void chrome.runtime.lastError;
     });
@@ -126,7 +132,7 @@ async function syncDynamicRegistration() {
 
   if (!origins.length) {
     if (existing.length) {
-      await chrome.scripting.unregisterContentScripts({ ids: [DYNAMIC_SCRIPT_ID] }).catch(function () {});
+      await chrome.scripting.unregisterContentScripts({ ids: [DYNAMIC_SCRIPT_ID] }).catch(function () { });
     }
     return;
   }

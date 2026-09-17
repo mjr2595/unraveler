@@ -72,6 +72,15 @@ var UNRAVELER_DEFAULTS = {
    */
   shiftClick: false,
 
+  /** Show the floating "scroll to latest comment" button on issue views. */
+  showScrollButton: true,
+
+  /** How long the latest comment stays highlighted after scrolling, in ms. */
+  highlightDurationMs: 1600,
+
+  /** Corner for the floating button: bottom-left | bottom-right | top-left | top-right. */
+  buttonPosition: 'bottom-left',
+
   /** Verbose console logging under the [Unraveler] prefix. */
   debug: false,
 
@@ -98,7 +107,23 @@ var UNRAVELER_SELECTORS = {
     // in expander.js walks down to the real control, so listing the wrapper
     // is enough and survives Atlassian moving the attribute onto the button.
     '[data-testid="issue-history.ui.history-items.load-more-button"]'
-  ]
+  ],
+
+  /**
+   * One element per comment, each carrying the numeric comment id that
+   * findLatest() maxes over (newest = highest, since Jira issues ids in
+   * creation order). Jira Cloud dropped the old `comment-<n>` DOM id — the id
+   * now rides on the wrapper's `data-componentid` and the `comment-base-item-<n>`
+   * testid (present even for off-screen comments). Best-effort; may drift.
+   */
+  commentItems: [
+    '[data-componentid^="issue-comment-base.ui.comment.comment-in-view-wrapper."]',
+    '[data-testid^="comment-base-item-"]',
+    '[id^="comment-"]'
+  ],
+
+  /** Whole-comment block, resolved from any match for a clean scroll target. */
+  commentBlock: '[data-componentid^="issue-comment-base.ui.comment.comment-in-view-wrapper."]'
 };
 
 /**

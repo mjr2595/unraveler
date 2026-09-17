@@ -19,6 +19,9 @@ green when finished, orange if it stopped at a safety limit.
 `Alt+Shift+E` re-runs it on demand. The popup has a manual **Expand now** button and
 all the settings.
 
+A floating button in the bottom-left corner — or `Alt+Shift+L` — scrolls to the newest
+comment and briefly highlights it.
+
 ### Sites
 
 Enabled out of the box on `*.atlassian.net`.
@@ -30,19 +33,22 @@ registers the content script for it. To make a host permanent instead, add it to
 
 ## Settings
 
-| Setting                 | Default | Notes                                                                                       |
-| ----------------------- | ------- | ------------------------------------------------------------------------------------------- |
-| Master switch           | on      | Disables all clicking                                                                       |
-| Expand automatically    | on      | Off = manual button / `Alt+Shift+E` only                                                    |
-| Comments & replies      | on      |                                                                                             |
-| History "Load more"     | on      |                                                                                             |
-| Match button text       | on      | Fallback for when Atlassian renames a testid                                                |
-| Keep scroll position    | on      | Counters the [JRACLOUD-94212](https://jira.atlassian.com/browse/JRACLOUD-94212) jump-to-top |
-| Shift-click to load all | off     | Works on Jira Server/DC; unverified on Cloud, may do nothing                                |
-| Max clicks per run      | 100     | Safety cap                                                                                  |
-| Max seconds per run     | 90      | Safety cap                                                                                  |
-| Log to console          | off     | Prefixed `[Unraveler]`                                                                      |
-| Extra selectors         | —       | One CSS selector per line                                                                   |
+| Setting                 | Default     | Notes                                                                                       |
+| ----------------------- | ----------- | ------------------------------------------------------------------------------------------- |
+| Master switch           | on          | Disables all clicking; also hides the floating button                                       |
+| Expand automatically    | on          | Off = manual button / `Alt+Shift+E` only                                                    |
+| Comments & replies      | on          |                                                                                             |
+| History "Load more"     | on          |                                                                                             |
+| Match button text       | on          | Fallback for when Atlassian renames a testid                                                |
+| Keep scroll position    | on          | Counters the [JRACLOUD-94212](https://jira.atlassian.com/browse/JRACLOUD-94212) jump-to-top |
+| Shift-click to load all | off         | Works on Jira Server/DC; unverified on Cloud, may do nothing                                |
+| Scroll-to-latest button | on          | Floating button + `Alt+Shift+L`; jumps to and highlights the newest comment                 |
+| Button corner           | bottom-left | Which corner the floating button sits in                                                    |
+| Highlight duration      | 1600 ms     | How long the newest comment stays highlighted                                               |
+| Max clicks per run      | 100         | Safety cap                                                                                  |
+| Max seconds per run     | 90          | Safety cap                                                                                  |
+| Log to console          | off         | Prefixed `[Unraveler]`                                                                      |
+| Extra selectors         | —           | One CSS selector per line                                                                   |
 
 ## When Atlassian renames a testid
 
@@ -59,19 +65,21 @@ The text fallback should keep things working in the meantime.
 
 ## Tests
 
-31 behavioural assertions run the real `src/content/expander.js` against a minimal DOM
-mock — no reimplementation of the logic under test.
+45 behavioural assertions run the real `src/content/expander.js` and
+`src/content/latest.js` against a minimal DOM mock — no reimplementation of the logic
+under test.
 
 ```bash
-bun  run test/engine.test.js      # or
-deno run --allow-read test/engine.test.js
+bun  run test/engine.test.js && bun  run test/latest.test.js      # or
+deno run --allow-read test/engine.test.js && deno run --allow-read test/latest.test.js
 ```
 
 Covered: pagination to completion, the JRACLOUD-94212 collapse loop, click caps, busy /
 `aria-disabled` buttons, wrapper→button resolution, text-fallback activation, text-fallback
 false positives, per-thread signature isolation, blacklist isolation between siblings,
 shift-click propagation, feature toggles, scroll restoration, malformed user selectors,
-and empty pages.
+empty pages, and latest-comment detection (id / timestamp / document-order fallback,
+scroll targeting, master-switch guard).
 
 ## Layout
 
@@ -80,6 +88,8 @@ manifest.json
 src/
   shared/defaults.js     settings + selectors + text patterns  ← edit selectors here
   content/expander.js    the engine (click loop, progress detection)
+  content/latest.js      newest-comment locator (scroll + highlight)
+  content/fab.js         floating scroll-to-latest button (Shadow DOM)
   content/main.js        SPA nav detection, messaging, auto-trigger
   background.js          badge, keyboard command, optional hosts
   popup/                 status UI + settings
