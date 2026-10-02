@@ -6,3 +6,6 @@
 
 # Packaged extension artifacts
 *.zip
+
+# Chrome store stuff
+store/LISTING.md
