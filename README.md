@@ -4,11 +4,13 @@ Chrome extension that automatically **expands Jira Cloud issue threads** by clic
 every _Show more comments_, _Show more replies_, and history _Load more_ button until
 the whole thread is on screen.
 
-[Chrome Web Store Link](https://chromewebstore.google.com/detail/unraveler-%E2%80%94-jira-thread-e/ppdhnklampnbinhpejefjkhgjpndiebo)
-
 ## Install
 
-1. Clone this repo or download the zip from releases
+Install from [Chrome Web Store](https://chromewebstore.google.com/detail/unraveler-%E2%80%94-jira-thread-e/ppdhnklampnbinhpejefjkhgjpndiebo)
+
+Or, for contributors:
+
+1. Clone this repo
 2. Open `chrome://extensions`
 3. Enable **Developer mode** (top right)
 4. **Load unpacked** → select this folder
