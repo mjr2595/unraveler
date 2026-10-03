@@ -1,8 +1,10 @@
 # ![Unraveler Logo](icons/icon32.png) Unraveler
 
-Chrome extension (MV3) that automatically **expands Jira Cloud issue threads** by clicking
+Chrome extension that automatically **expands Jira Cloud issue threads** by clicking
 every _Show more comments_, _Show more replies_, and history _Load more_ button until
 the whole thread is on screen.
+
+[Chrome Web Store Link](https://chromewebstore.google.com/detail/unraveler-%E2%80%94-jira-thread-e/ppdhnklampnbinhpejefjkhgjpndiebo)
 
 ## Install
 
