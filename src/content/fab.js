@@ -51,11 +51,11 @@ var UnravelerFab = (function () {
     stack.className = 'stack' + (position.indexOf('top') === 0 ? ' down' : '');
   }
 
-  // Main button 38px, top button 32px, 8px apart: centre to centre is
-  // 19 + 8 + 16 = 43px.
+  // Main button 38px, top button 24px, 8px apart: centre to centre is
+  // 19 + 8 + 12 = 39px.
   var SHADOW_CSS = [
-    '.stack{position:relative;width:38px;height:38px;--lift:-43px;}',
-    '.stack.down{--lift:43px;}',
+    '.stack{position:relative;width:38px;height:38px;--lift:-39px;}',
+    '.stack.down{--lift:39px;}',
     '.fab{',
     '  display:flex;align-items:center;justify-content:center;',
     '  width:38px;height:38px;padding:0;box-sizing:border-box;',
@@ -72,18 +72,16 @@ var UnravelerFab = (function () {
     '.fab-latest{position:relative;z-index:2;}',
     '.fab-latest .fab-img,.fab-latest svg{filter:drop-shadow(0 2px 6px rgba(9,30,66,.35));}',
     '.fab-latest:hover .fab-img,.fab-latest:hover svg{filter:drop-shadow(0 4px 10px rgba(9,30,66,.45));}',
-    // Tucked behind the main button until revealed. The icon is rotated, so the
-    // shadow lives on the button instead — on the icon it would fall upward.
+    // Tucked behind the main button until revealed.
     '.fab-top{',
     '  position:absolute;z-index:1;left:50%;top:50%;',
-    '  width:32px;height:32px;margin:-16px 0 0 -16px;border-radius:8px;',
+    '  width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;',
     '  opacity:0;visibility:hidden;pointer-events:none;transform:scale(.6);',
-    '  filter:drop-shadow(0 2px 6px rgba(9,30,66,.35));',
     // Hiding waits a beat so the pointer can cross from one button to the other.
-    '  transition:transform .18s ease .12s,opacity .18s ease .12s,visibility 0s linear .3s,filter .15s;',
+    '  transition:transform .18s ease .12s,opacity .18s ease .12s,visibility 0s linear .3s;',
     '}',
-    '.fab-top .fab-img,.fab-top svg{transform:rotate(180deg);}',
-    '.fab-top:hover{filter:drop-shadow(0 4px 10px rgba(9,30,66,.45));}',
+    '.fab-top svg{filter:drop-shadow(0 2px 6px rgba(9,30,66,.35));}',
+    '.fab-top:hover svg{filter:drop-shadow(0 4px 10px rgba(9,30,66,.45));}',
     // Invisible bridge over the gap, so the hover survives the crossing.
     '.fab-top::after{content:"";position:absolute;left:0;right:0;top:100%;height:12px;}',
     '.stack.down .fab-top::after{top:auto;bottom:100%;}',
@@ -91,7 +89,7 @@ var UnravelerFab = (function () {
     // the button stuck open after the pointer moves away.
     '.stack:hover .fab-top,.stack:has(.fab:focus-visible) .fab-top{',
     '  opacity:1;visibility:visible;pointer-events:auto;transform:translateY(var(--lift));',
-    '  transition:transform .18s ease,opacity .18s ease,visibility 0s,filter .15s;',
+    '  transition:transform .18s ease,opacity .18s ease,visibility 0s;',
     '}',
     '.stack:hover .fab-top:active,.stack:has(.fab:focus-visible) .fab-top:active{',
     '  transform:translateY(var(--lift)) scale(.94);',
@@ -150,13 +148,39 @@ var UnravelerFab = (function () {
     return img;
   }
 
-  function buildButton(className, label, getHandler) {
+  // Scroll-to-top glyph: an up-chevron in a circle. Same 128-unit geometry,
+  // blue and stroke weight as the packaged icon's chevron, minus the bar.
+  function buildTopIcon() {
+    var svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 128 128');
+    svg.setAttribute('aria-hidden', 'true');
+
+    var circle = document.createElementNS(SVG_NS, 'circle');
+    circle.setAttribute('cx', '64');
+    circle.setAttribute('cy', '64');
+    circle.setAttribute('r', '64');
+    circle.setAttribute('fill', '#0c66e4');
+    svg.appendChild(circle);
+
+    var chevron = document.createElementNS(SVG_NS, 'path');
+    chevron.setAttribute('d', 'M36 78L64 50l28 28');
+    chevron.setAttribute('stroke', '#fff');
+    chevron.setAttribute('stroke-width', '14');
+    chevron.setAttribute('stroke-linecap', 'round');
+    chevron.setAttribute('stroke-linejoin', 'round');
+    chevron.setAttribute('fill', 'none');
+    svg.appendChild(chevron);
+
+    return svg;
+  }
+
+  function buildButton(className, label, icon, getHandler) {
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'fab ' + className;
     btn.title = label;
     btn.setAttribute('aria-label', label);
-    btn.appendChild(buildIcon());
+    btn.appendChild(icon);
     btn.addEventListener('click', function (ev) {
       ev.preventDefault();
       var handler = getHandler();
@@ -185,8 +209,8 @@ var UnravelerFab = (function () {
     applyDirection();
     // The top button comes second in the DOM so Tab reaches it right after the
     // main button, while z-index keeps it painted behind.
-    stack.appendChild(buildButton('fab-latest', LATEST_LABEL, function () { return latestHandler; }));
-    stack.appendChild(buildButton('fab-top', TOP_LABEL, function () { return topHandler; }));
+    stack.appendChild(buildButton('fab-latest', LATEST_LABEL, buildIcon(), function () { return latestHandler; }));
+    stack.appendChild(buildButton('fab-top', TOP_LABEL, buildTopIcon(), function () { return topHandler; }));
     root.appendChild(stack);
 
     document.documentElement.appendChild(host);
