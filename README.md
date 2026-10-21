@@ -23,7 +23,8 @@ green when finished, orange if it stopped at a safety limit.
 all the settings.
 
 A floating button in the bottom-left corner — or `Alt+Shift+L` — scrolls to the newest
-comment and briefly highlights it.
+comment and briefly highlights it. Hover it and a smaller button slides out that scrolls
+back to the very top of the issue — or press `Alt+Shift+U`.
 
 ### Sites
 
@@ -38,15 +39,15 @@ registers the content script for it. To make a host permanent instead, add it to
 
 | Setting                 | Default     | Notes                                                                                       |
 | ----------------------- | ----------- | ------------------------------------------------------------------------------------------- |
-| Master switch           | on          | Disables all clicking; also hides the floating button                                       |
+| Master switch           | on          | Disables all clicking; also hides the floating buttons                                      |
 | Expand automatically    | on          | Off = manual button / `Alt+Shift+E` only                                                    |
 | Comments & replies      | on          |                                                                                             |
 | History "Load more"     | on          |                                                                                             |
 | Match button text       | on          | Fallback for when Atlassian renames a testid                                                |
 | Keep scroll position    | on          | Counters the [JRACLOUD-94212](https://jira.atlassian.com/browse/JRACLOUD-94212) jump-to-top |
 | Shift-click to load all | off         | Works on Jira Server/DC; unverified on Cloud, may do nothing                                |
-| Scroll-to-latest button | on          | Floating button + `Alt+Shift+L`; jumps to and highlights the newest comment                 |
-| Button corner           | bottom-left | Which corner the floating button sits in                                                    |
+| Scroll buttons          | on          | `Alt+Shift+L` highlights the newest comment; hover for scroll-to-top (`Alt+Shift+U`)        |
+| Button corner           | bottom-left | Which corner the floating buttons sit in                                                    |
 | Highlight duration      | 1600 ms     | How long the newest comment stays highlighted                                               |
 | Max clicks per run      | 100         | Safety cap                                                                                  |
 | Max seconds per run     | 90          | Safety cap                                                                                  |
@@ -68,7 +69,7 @@ The text fallback should keep things working in the meantime.
 
 ## Tests
 
-45 behavioural assertions run the real `src/content/expander.js` and
+61 behavioural assertions run the real `src/content/expander.js` and
 `src/content/latest.js` against a minimal DOM mock — no reimplementation of the logic
 under test.
 
@@ -80,9 +81,11 @@ deno run --allow-read test/engine.test.js && deno run --allow-read test/latest.t
 Covered: pagination to completion, the JRACLOUD-94212 collapse loop, click caps, busy /
 `aria-disabled` buttons, wrapper→button resolution, text-fallback activation, text-fallback
 false positives, per-thread signature isolation, blacklist isolation between siblings,
-shift-click propagation, feature toggles, scroll restoration, malformed user selectors,
-empty pages, and latest-comment detection (id / timestamp / document-order fallback,
-scroll targeting, master-switch guard).
+shift-click propagation, feature toggles, scroll restoration (and leaving deliberate scrolls
+alone), malformed user selectors, empty pages, latest-comment detection (id / timestamp /
+document-order fallback, scroll targeting, master-switch guard), and scroll-to-top (every
+scrolled container around the issue, unrelated containers untouched, comment fallback,
+master-switch guard).
 
 ## Known limitations
 

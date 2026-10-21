@@ -4,7 +4,7 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { El, body, install, resetDom } from './dom-mock.js';
+import { El, body, install, resetDom, windowMock } from './dom-mock.js';
 
 const ROOT = new URL('..', import.meta.url).pathname.replace(/\/$/, '');
 
@@ -158,6 +158,123 @@ console.log('\n9. Respects the master switch');
   check('disabled => did not scroll', scrolled === false, `scrolled=${scrolled}`);
 
   El.prototype.scrollIntoView = function () { };
+}
+
+// ---------------------------------------------------------------------
+// Scroll to top
+
+/** A container that scrolls, currently scrolled down to `top`. */
+function scroller(top, overflowY = 'auto') {
+  const el = new El('div');
+  el.style.overflowY = overflowY;
+  el.scrollHeight = 5000;
+  el.clientHeight = 800;
+  el.scrollTop = top;
+  return el;
+}
+
+/** Stub window.scrollTo for one test; returns the list of recorded calls. */
+function spyWindowScroll(scrollY) {
+  const calls = [];
+  windowMock.scrollY = scrollY;
+  windowMock.scrollTo = (opts) => { calls.push(opts); };
+  return calls;
+}
+
+function restoreWindowScroll() {
+  windowMock.scrollY = 0;
+  windowMock.scrollTo = () => { };
+}
+
+console.log('\n10. scrollToTop scrolls every container the issue scrolls in, then the page');
+{
+  resetDom();
+  const page = scroller(1200);
+  const panel = scroller(900, 'scroll');
+  const heading = new El('h1', { 'data-testid': 'issue.views.issue-base.foundation.summary.heading' });
+  panel.append(heading);
+  page.append(panel);
+  body.append(page);
+
+  // A scrolled container that is not around the issue (e.g. a board column).
+  const unrelated = scroller(700);
+  body.append(unrelated);
+
+  const calls = spyWindowScroll(300);
+  const r = Latest.scrollToTop(CFG);
+
+  check('reported scrolled', r.scrolled === true, JSON.stringify(r));
+  check('inner panel at the top', panel.scrollTop === 0, `scrollTop=${panel.scrollTop}`);
+  check('outer container at the top', page.scrollTop === 0, `scrollTop=${page.scrollTop}`);
+  check('scrolled smoothly', panel.lastScrollBehavior === 'smooth', panel.lastScrollBehavior);
+  check('page scrolled to the top', calls.length === 1 && calls[0].top === 0, JSON.stringify(calls));
+  check('left unrelated containers alone', unrelated.scrollTop === 700, `scrollTop=${unrelated.scrollTop}`);
+
+  restoreWindowScroll();
+}
+
+console.log('\n11. scrollToTop ignores scrolled ancestors that are not scroll containers');
+{
+  resetDom();
+  const clipped = scroller(400, 'hidden');   // overflow:hidden — not user-scrollable
+  const heading = new El('h1', { 'data-testid': 'issue.views.issue-base.foundation.summary.heading' });
+  clipped.append(heading);
+  body.append(clipped);
+
+  spyWindowScroll(0);
+  const r = Latest.scrollToTop(CFG);
+  check('nothing to scroll', r.scrolled === false, JSON.stringify(r));
+  check('overflow:hidden container untouched', clipped.scrollTop === 400, `scrollTop=${clipped.scrollTop}`);
+
+  restoreWindowScroll();
+}
+
+console.log('\n12. scrollToTop climbs from a comment when no issue landmark matches');
+{
+  resetDom();
+  const feedPanel = scroller(2500);
+  body.append(feedPanel);
+  const c = wrap(1000002);
+  c.remove();
+  feedPanel.append(c);
+
+  spyWindowScroll(0);
+  const r = Latest.scrollToTop(CFG);
+  check('reported scrolled', r.scrolled === true, JSON.stringify(r));
+  check('comment feed panel at the top', feedPanel.scrollTop === 0, `scrollTop=${feedPanel.scrollTop}`);
+
+  restoreWindowScroll();
+}
+
+console.log('\n13. scrollToTop is a clean no-op when already at the top');
+{
+  resetDom();
+  const panel = scroller(0);
+  panel.append(new El('h1', { 'data-testid': 'issue.views.issue-base.foundation.summary.heading' }));
+  body.append(panel);
+
+  const calls = spyWindowScroll(0);
+  const r = Latest.scrollToTop(CFG);
+  check('reported not scrolled', r.scrolled === false, JSON.stringify(r));
+  check('did not touch the page scroll', calls.length === 0, JSON.stringify(calls));
+
+  restoreWindowScroll();
+}
+
+console.log('\n14. scrollToTop respects the master switch');
+{
+  resetDom();
+  const panel = scroller(900);
+  panel.append(new El('h1', { 'data-testid': 'issue.views.issue-base.foundation.summary.heading' }));
+  body.append(panel);
+
+  const calls = spyWindowScroll(300);
+  const r = Latest.scrollToTop({ ...CFG, enabled: false });
+  check('disabled => not scrolled', r.scrolled === false, JSON.stringify(r));
+  check('disabled => panel untouched', panel.scrollTop === 900, `scrollTop=${panel.scrollTop}`);
+  check('disabled => page untouched', calls.length === 0, JSON.stringify(calls));
+
+  restoreWindowScroll();
 }
 
 console.log(`\n${'='.repeat(46)}`);

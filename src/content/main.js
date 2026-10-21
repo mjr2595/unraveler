@@ -181,6 +181,23 @@
   }
 
   // -------------------------------------------------------------------
+  // Scroll actions
+  // -------------------------------------------------------------------
+  //
+  // Both are deliberate scrolls, so the engine is told first — otherwise its
+  // jump-to-top guard could undo them during a run.
+
+  function scrollToLatest() {
+    UnravelerEngine.noteUserScroll();
+    return UnravelerLatest.scrollToLatest(cfg);
+  }
+
+  function scrollToTop() {
+    UnravelerEngine.noteUserScroll();
+    return UnravelerLatest.scrollToTop(cfg);
+  }
+
+  // -------------------------------------------------------------------
   // Messaging
   // -------------------------------------------------------------------
 
@@ -204,7 +221,11 @@
         return;
 
       case 'unraveler:scroll-latest':
-        sendResponse(UnravelerLatest.scrollToLatest(cfg));
+        sendResponse(scrollToLatest());
+        return; // synchronous
+
+      case 'unraveler:scroll-top':
+        sendResponse(scrollToTop());
         return; // synchronous
 
       default:
@@ -213,11 +234,11 @@
   });
 
   // -------------------------------------------------------------------
-  // Floating button
+  // Floating buttons
   // -------------------------------------------------------------------
 
   function mountFab() {
-    UnravelerFab.mount(function () { UnravelerLatest.scrollToLatest(cfg); });
+    UnravelerFab.mount(scrollToLatest, scrollToTop);
   }
 
   function updateFab() {

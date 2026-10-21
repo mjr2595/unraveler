@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Unraveler — Jira Thread Expander",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Automatically expands Jira Cloud issue threads: 'Show more comments', 'Show more replies', and history 'Load more'.",
   "minimum_chrome_version": "116",
 
@@ -63,6 +63,10 @@
     "scroll-latest-comment": {
       "suggested_key": { "default": "Alt+Shift+L" },
       "description": "Scroll to and highlight the latest comment"
+    },
+    "scroll-to-top": {
+      "suggested_key": { "default": "Alt+Shift+U" },
+      "description": "Scroll back to the top of the issue"
     }
   }
 }

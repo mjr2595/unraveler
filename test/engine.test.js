@@ -300,7 +300,31 @@ console.log('\n12. Scroll position restored after a jump-to-top');
 }
 
 // ---------------------------------------------------------------------
-console.log('\n13. Invalid user selector does not abort the run');
+console.log('\n13. A deliberate scroll to the top during a run is not undone');
+{
+  resetDom();
+  const f = feed();
+  const btn = new El('button', { 'data-testid': LOAD_MORE }, 'Show more comments');
+  f.append(btn);
+  windowMock.scrollY = 4200;
+  let restoredTo = null;
+  windowMock.scrollTo = (opts) => { restoredTo = opts.top; };
+  // The user presses scroll-to-top while the click is settling.
+  btn.addEventListener('click', () => {
+    Engine.noteUserScroll();
+    windowMock.scrollY = 0;
+    addComments(f, 5);
+    btn.remove();
+  });
+
+  await Engine.run(CFG);
+  check('left the deliberate scroll alone', restoredTo === null, `restoredTo=${restoredTo}`);
+  windowMock.scrollY = 0;
+  windowMock.scrollTo = () => {};
+}
+
+// ---------------------------------------------------------------------
+console.log('\n14. Invalid user selector does not abort the run');
 {
   resetDom();
   const f = feed();
@@ -315,7 +339,7 @@ console.log('\n13. Invalid user selector does not abort the run');
 }
 
 // ---------------------------------------------------------------------
-console.log('\n14. No-op on a page with nothing to expand');
+console.log('\n15. No-op on a page with nothing to expand');
 {
   resetDom();
   feed();

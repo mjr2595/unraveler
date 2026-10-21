@@ -1,10 +1,11 @@
 /**
- * Unraveler — latest-comment locator.
+ * Unraveler — latest-comment locator and scroll-to-top.
  *
  * Finds the newest comment on a Jira issue, scrolls it into view, and gives it
- * a brief highlight. This lives apart from the expander engine because it
- * answers a different question — "where is the newest comment?" — and is only
- * ever driven manually, by the floating button and the keyboard shortcut.
+ * a brief highlight; or scrolls the issue back to its very top. This lives
+ * apart from the expander engine because it answers a different question —
+ * "where is the newest comment?" — and is only ever driven manually, by the
+ * floating buttons and the keyboard shortcuts.
  *
  * Newest-comment detection, cheapest reliable signal first:
  *   1. The numeric `comment-<n>` container id. Jira assigns these in creation
@@ -216,15 +217,101 @@ var UnravelerLatest = (function () {
     return { found: true };
   }
 
+  // ---------------------------------------------------------------------
+  // Scroll to top
+  // ---------------------------------------------------------------------
+
+  /**
+   * Elements inside the issue view to climb from: the first match for each
+   * landmark selector, plus the first comment. Several anchors, because the
+   * header and the activity feed can sit in different scroll containers.
+   */
+  function findIssueAnchors() {
+    var sels = (typeof UNRAVELER_SELECTORS !== 'undefined' && UNRAVELER_SELECTORS.issueTop) || [];
+    var out = [];
+    sels.forEach(function (sel) {
+      var el = null;
+      try {
+        el = document.querySelector(sel);
+      } catch (err) {
+        console.warn(LOG_PREFIX, 'Invalid issue selector skipped:', sel, err.message);
+        return;
+      }
+      if (el) out.push(el);
+    });
+    var comments = findComments();
+    if (comments.length) out.push(comments[0]);
+    return out;
+  }
+
+  function isScrollContainer(el) {
+    if (!el || !(el.scrollHeight > el.clientHeight + 1)) return false;
+    var oy;
+    try {
+      oy = window.getComputedStyle(el).overflowY;
+    } catch (err) {
+      return false;
+    }
+    return oy === 'auto' || oy === 'scroll' || oy === 'overlay';
+  }
+
+  function scrollElementToTop(el, behavior) {
+    try {
+      el.scrollTo({ top: 0, behavior: behavior });
+    } catch (err) {
+      el.scrollTop = 0;
+    }
+  }
+
+  /**
+   * Scroll the issue back to its very top. Jira usually scrolls the issue in
+   * an inner container rather than the page, and a summary-heading
+   * scrollIntoView would leave the breadcrumbs above it cut off — so every
+   * scrolled container above the issue goes to 0, then the page itself.
+   * @returns {{ scrolled: boolean }}
+   */
+  function scrollToTop(cfg) {
+    if (cfg && cfg.enabled === false) return { scrolled: false };
+
+    var behavior = prefersReducedMotion() ? 'auto' : 'smooth';
+    var seen = new Set();
+    var moved = 0;
+
+    findIssueAnchors().forEach(function (anchor) {
+      for (var el = anchor; el; el = el.parentNode) {
+        if (seen.has(el)) break; // the rest of this chain is already handled
+        seen.add(el);
+        if (el.scrollTop > 0 && isScrollContainer(el)) {
+          scrollElementToTop(el, behavior);
+          moved += 1;
+        }
+      }
+    });
+
+    if (window.scrollY > 0) {
+      try {
+        window.scrollTo({ top: 0, behavior: behavior });
+      } catch (err) {
+        window.scrollTo(0, 0);
+      }
+      moved += 1;
+    }
+
+    log(cfg, moved ? 'Scrolled to top (' + moved + ' container(s)).' : 'Already at the top.');
+    return { scrolled: moved > 0 };
+  }
+
   return {
     findLatest: findLatest,
     scrollToLatest: scrollToLatest,
+    scrollToTop: scrollToTop,
     highlight: highlight,
     // exported for the console and the test harness
     _internals: {
       findComments: findComments,
       parseCommentId: parseCommentId,
-      latestTimeIn: latestTimeIn
+      latestTimeIn: latestTimeIn,
+      findIssueAnchors: findIssueAnchors
     }
   };
 })();

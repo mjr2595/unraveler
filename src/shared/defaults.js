@@ -72,7 +72,10 @@ var UNRAVELER_DEFAULTS = {
    */
   shiftClick: false,
 
-  /** Show the floating "scroll to latest comment" button on issue views. */
+  /**
+   * Show the floating "scroll to latest comment" button on issue views, with
+   * its "scroll to top" companion that slides out on hover.
+   */
   showScrollButton: true,
 
   /** How long the latest comment stays highlighted after scrolling, in ms. */
@@ -123,7 +126,19 @@ var UNRAVELER_SELECTORS = {
   ],
 
   /** Whole-comment block, resolved from any match for a clean scroll target. */
-  commentBlock: '[data-componentid^="issue-comment-base.ui.comment.comment-in-view-wrapper."]'
+  commentBlock: '[data-componentid^="issue-comment-base.ui.comment.comment-in-view-wrapper."]',
+
+  /**
+   * Landmarks inside the issue view. scrollToTop() climbs from each (and from
+   * a comment) to find every container the issue scrolls in, which differs
+   * between the full page, the board side panel and the modal. Best-effort.
+   */
+  issueTop: [
+    '[data-testid="issue.views.issue-base.foundation.summary.heading"]',
+    '[data-testid^="issue.views.issue-base.foundation.breadcrumbs"]',
+    '[data-testid^="issue.views.issue-details"]',
+    '[data-testid^="issue.activity"]'
+  ]
 };
 
 /**
