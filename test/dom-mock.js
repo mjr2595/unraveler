@@ -35,6 +35,9 @@ export class El {
     this._uid = ++uid;
     this._listeners = {};
     this.style = {};
+    this.scrollTop = 0;
+    this.scrollHeight = 0;
+    this.clientHeight = 0;
   }
 
   get id() { return this.attrs.id || ''; }
@@ -122,6 +125,8 @@ export class El {
 
   scrollIntoView() { }
 
+  scrollTo(opts) { this.scrollTop = opts.top; this.lastScrollBehavior = opts.behavior; }
+
   addEventListener(type, fn) { (this._listeners[type] ||= []).push(fn); }
 
   dispatchEvent(ev) {
@@ -188,7 +193,12 @@ export class PointerEvent extends Evt { }
 export const windowMock = {
   scrollY: 0,
   scrollTo() { },
-  getComputedStyle: () => ({ display: 'block', visibility: 'visible', opacity: '1' }),
+  getComputedStyle: (el) => ({
+    display: 'block',
+    visibility: 'visible',
+    opacity: '1',
+    overflowY: (el && el.style && el.style.overflowY) || 'visible'
+  }),
   addEventListener() { }
 };
 

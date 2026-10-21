@@ -33,11 +33,18 @@ var UnravelerEngine = (function () {
     '[data-testid*="activity"]'
   ].join(',');
 
+  /**
+   * A deliberate scroll this recent before a click still counts as the
+   * user's, since a smooth scroll can still be animating when the click fires.
+   */
+  var USER_SCROLL_GRACE_MS = 2000;
+
   var state = {
     running: false,
     cancelled: false,
     runId: 0,
-    lastResult: null
+    lastResult: null,
+    lastUserScrollAt: 0
   };
 
   function log(cfg) {
@@ -335,6 +342,14 @@ var UnravelerEngine = (function () {
   }
 
   /**
+   * Record a deliberate scroll (the floating buttons, the shortcuts) so the
+   * jump-to-top guard doesn't mistake it for JRACLOUD-94212 and undo it.
+   */
+  function noteUserScroll() {
+    state.lastUserScrollAt = Date.now();
+  }
+
+  /**
    * @param {object} cfg    Merged settings.
    * @param {function} onUpdate Called with a status object as work proceeds.
    * @returns {Promise<object>} Final status.
@@ -410,6 +425,7 @@ var UnravelerEngine = (function () {
         var beforeSize = contentSize();
         var beforeLabel = labelOf(target);
         var scrollYBefore = window.scrollY;
+        var clickedAt = Date.now();
 
         log(cfg, 'Clicking:', beforeLabel || '(no label)', target);
         fireClick(target, cfg.shiftClick);
@@ -420,7 +436,8 @@ var UnravelerEngine = (function () {
 
         // Counter the JRACLOUD-94212 symptom where loading older comments
         // slams the viewport back to the top of the issue.
-        if (cfg.preserveScroll && scrollYBefore > 200 && window.scrollY < 100) {
+        var userScrolled = state.lastUserScrollAt >= clickedAt - USER_SCROLL_GRACE_MS;
+        if (cfg.preserveScroll && !userScrolled && scrollYBefore > 200 && window.scrollY < 100) {
           log(cfg, 'Scroll jumped to top, restoring to', scrollYBefore);
           window.scrollTo({ top: scrollYBefore, behavior: 'instant' });
         }
@@ -465,6 +482,7 @@ var UnravelerEngine = (function () {
     cancel: cancel,
     isRunning: isRunning,
     getLastResult: getLastResult,
+    noteUserScroll: noteUserScroll,
     // exported for debugging from the console and for the test harness
     _internals: {
       collect: collect,

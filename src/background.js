@@ -74,7 +74,8 @@ chrome.tabs.onRemoved.addListener(function (tabId) {
 
 var COMMAND_MESSAGE = {
   'expand-now': 'unraveler:expand',
-  'scroll-latest-comment': 'unraveler:scroll-latest'
+  'scroll-latest-comment': 'unraveler:scroll-latest',
+  'scroll-to-top': 'unraveler:scroll-top'
 };
 
 chrome.commands.onCommand.addListener(function (command) {
