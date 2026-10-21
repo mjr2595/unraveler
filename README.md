@@ -87,6 +87,19 @@ document-order fallback, scroll targeting, master-switch guard), and scroll-to-t
 scrolled container around the issue, unrelated containers untouched, comment fallback,
 master-switch guard).
 
+## Packaging
+
+Bump `version` in `manifest.json`, then:
+
+```bash
+./scripts/package.sh
+```
+
+It runs the tests, builds `unraveler-<version>.zip` (just `manifest.json`, `src/` and
+`icons/`), checks that every file the manifest references made it in, and only then
+replaces any older `unraveler-*.zip`. Uncommitted changes get a warning but don't block
+the build.
+
 ## Known limitations
 
 - **Only expands what's mounted.** Jira's History lives behind a tab. If the _History_ or
